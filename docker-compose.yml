@@ -1,0 +1,15 @@
+services:
+  argos-novel-bot:
+    build: .
+    restart: unless-stopped
+
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      WORKDIR: /app/work
+      WORKERS: ${WORKERS:-2}
+      CHUNK_CHARS: ${CHUNK_CHARS:-1800}
+      MAX_FILE_MB: ${MAX_FILE_MB:-45}
+      MAX_OUTPUT_MB: ${MAX_OUTPUT_MB:-45}
+
+    volumes:
+      - ./work:/app/work
