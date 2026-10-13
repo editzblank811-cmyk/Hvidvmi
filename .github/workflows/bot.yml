@@ -1,0 +1,53 @@
+name: Argos Novel Translator Bot
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: argos-telegram-bot
+  cancel-in-progress: false
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install system libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            libxml2-dev \
+            libxslt1-dev
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Argos models
+        run: python install_argos.py
+
+      - name: Run Telegram bot
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          WORKDIR: work
+          WORKERS: "2"
+          CHUNK_CHARS: "1800"
+        run: python bot.py
